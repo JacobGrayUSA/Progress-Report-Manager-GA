@@ -53,7 +53,9 @@
 <div class="sidebar bottom">
   <img alt="Add-on logo" class="logo" width="27" height="27"
       src="https://googledrive.com/host/0B0G1UdyJGrY6XzdjQWF4a1JYY1k/translate-logo-small.png">
-  <span class="gray branding-text">Translate sample by Google</span>
+  <span class="gray branding-text">Change this logo!!!</span>
+  <br />
+  <span><button id="enter-devmode">Dev Mode</button></span>
 </div>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
@@ -66,6 +68,7 @@
   $(function() {
     $('#run-translation').click(runTranslation);
     $('#insert-text').click(insertText);
+    $('#enter-devmode').click(confirmDevMode);
     google.script.run.withSuccessHandler(loadPreferences)
         .withFailureHandler(showError).getPreferences();
   });
@@ -84,6 +87,33 @@
         .filter('[value=' + languagePrefs.destLang + ']')
         .attr('checked', true);
   }
+
+
+  /**
+   * Runs a server-side function to translate the user-selected text and update
+   * the sidebar UI with the resulting translation.
+   */
+  function confirmDevMode() {
+    this.disabled = true;
+    $('#error').remove();
+    var origin = $('input[name=origin]:checked').val();
+    var dest = $('input[name=dest]:checked').val();
+    var savePrefs = $('#save-prefs').is(':checked');
+    google.script.run
+        .withSuccessHandler(
+          function(translatedText, element) {
+            $('#translated-text').val(translatedText);
+            element.disabled = false;
+          })
+        .withFailureHandler(
+          function(msg, element) {
+            showError(msg, $('#button-bar'));
+            element.disabled = false;
+          })
+        .withUserObject(this)
+        .confirmDevMode();
+  }
+
 
   /**
    * Runs a server-side function to translate the user-selected text and update
